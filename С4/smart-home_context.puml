@@ -1,0 +1,35 @@
+@startuml
+!include https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "End user of the Smart Home system")
+
+System(SmartHomeApp, "Smart Home Application", "Central application that allows users to manage and monitor their home systems remotely")
+
+System_Boundary(DeviceDomain, "Device Management Domain") {
+    System_Ext(DeviceManagement, "Device Management", "Handles control and access to devices and sensors")
+    System_Ext(TemperatureSensors, "Temperature Sensors", "Provides current temperature data from various locations")
+    System_Ext(HeatingDevices, "Heating Devices", "Controls heating appliances remotely")
+}
+
+System_Boundary(MonitoringDomain, "Monitoring and Display Domain") {
+    System_Ext(MonitoringDisplay, "Monitoring and Display", "Provides temperature data to the user interface")
+}
+
+System_Boundary(UserDomain, "User Management Domain") {
+    System_Ext(UserManagement, "User Access Control", "Controls user access to data and devices")
+}
+
+System_Boundary(NotificationDomain, "Notification Settings Domain") {
+    System_Ext(NotificationSettings, "Notification Settings", "Allows users to configure alerts for critical changes")
+}
+
+Rel(user, SmartHomeApp, "Interacts with through web/mobile interface", "HTTP/HTTPS")
+
+Rel(SmartHomeApp, DeviceManagement, "Manages devices and retrieves data from sensors", "Internal API")
+Rel(DeviceManagement, TemperatureSensors, "Accesses temperature data", "Sensor API")
+Rel(DeviceManagement, HeatingDevices, "Sends commands to control heating appliances", "Device API")
+Rel(SmartHomeApp, MonitoringDisplay, "Displays temperature data", "Internal API")
+Rel(SmartHomeApp, UserManagement, "Manages user authentication and access control", "Internal API")
+Rel(SmartHomeApp, NotificationSettings, "Configures alerts for users", "Internal API")
+
+@enduml

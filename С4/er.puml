@@ -1,0 +1,59 @@
+@startuml
+entity "User" {
+    * id : String
+    * name : String
+    * email : String
+    * password : String
+    * role : String
+}
+
+entity "House" {
+    * id : String
+    * address : String
+    * owner_id : String
+}
+
+entity "Device" {
+    * id : String
+    * type_id : String
+    * house_id : String
+    * serial_number : String
+    * status : String
+}
+
+entity "DeviceType" {
+    * id : String
+    * name : String
+}
+
+entity "TemperatureSensor" {
+    * id : String
+    * device_id : String
+    * current_temperature : Float
+    * timestamp : DateTime
+}
+
+entity "SensorSettings" {
+    * id : String
+    * sensor_id : String
+    * min_threshold : Float
+    * max_threshold : Float
+    * alert_enabled : Boolean
+}
+
+entity "Notification" {
+    * id : String
+    * user_id : String
+    * message : String
+    * type : String
+    * timestamp : DateTime
+}
+
+' Связи
+User ||--o{ House : "owns"
+House ||--o{ Device : "contains"
+Device ||--o| DeviceType : "has type"
+Device ||--o{ TemperatureSensor : "generates"
+User ||--o{ Notification : "receives"
+TemperatureSensor ||--|| SensorSettings : "has settings"
+@enduml

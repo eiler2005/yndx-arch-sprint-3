@@ -1,0 +1,96 @@
+@startuml
+
+package "Device Management Service" {
+    class DeviceController {
+        +manageDevice()
+    }
+    class DeviceService {
+        +turnOnDevice()
+        +turnOffDevice()
+        +getDeviceStatus()
+    }
+    class DeviceRepository {
+        +saveDevice()
+        +findDeviceById()
+    }
+    class Device {
+        +id: String
+        +type: String
+        +status: String
+        +location: String
+    }
+    DeviceController --> DeviceService
+    DeviceService --> DeviceRepository
+    DeviceRepository --> Device
+}
+
+package "Temperature Monitoring Service" {
+    class TemperatureController {
+        +getTemperature()
+    }
+    class TemperatureService {
+        +processTemperatureData()
+    }
+    class TemperatureRepository {
+        +saveTemperatureData()
+        +findTemperatureByDeviceId()
+    }
+    class TemperatureSensor {
+        +id: String
+        +deviceId: String
+        +currentTemperature: Float
+        +lastUpdated: DateTime
+    }
+    TemperatureController --> TemperatureService
+    TemperatureService --> TemperatureRepository
+    TemperatureRepository --> TemperatureSensor
+}
+
+package "User Management Service" {
+    class UserController {
+        +registerUser()
+        +authenticateUser()
+    }
+    class UserService {
+        +authorizeUser()
+    }
+    class UserRepository {
+        +saveUser()
+        +findUserById()
+    }
+    class User {
+        +id: String
+        +name: String
+        +email: String
+        +password: String
+        +role: String
+    }
+    UserController --> UserService
+    UserService --> UserRepository
+    UserRepository --> User
+}
+
+package "Notification Service" {
+    class NotificationController {
+        +configureNotification()
+    }
+    class NotificationService {
+        +sendNotification()
+    }
+    class NotificationRepository {
+        +saveNotification()
+        +findNotificationByUserId()
+    }
+    class Notification {
+        +id: String
+        +userId: String
+        +message: String
+        +type: String
+        +timestamp: DateTime
+    }
+    NotificationController --> NotificationService
+    NotificationService --> NotificationRepository
+    NotificationRepository --> Notification
+}
+
+@enduml

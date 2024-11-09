@@ -1,0 +1,73 @@
+@startuml
+!include https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "End user of the Smart Home system")
+Person_Ext(device, "Device", "Physical device such as a sensor or heating appliance")
+
+System_Boundary(SmartHomeSystem, "Smart Home System") {
+
+    Container(DeviceManagementService, "Device Management Service", "Manages devices", "Java") {
+        Component(DeviceController, "DeviceController", "REST API for device control")
+        Component(DeviceService, "DeviceService", "Business logic for devices")
+        Component(DeviceRepository, "DeviceRepository", "Data access for device information")
+        Component(DeviceStatusPublisher, "DeviceStatusPublisher", "Publishes device status updates")
+    }
+
+    Container(TemperatureMonitoringService, "Temperature Monitoring Service", "Monitors temperatures", "Java") {
+        Component(TemperatureController, "TemperatureController", "REST API for temperature data")
+        Component(TemperatureService, "TemperatureService", "Business logic for temperature monitoring")
+        Component(TemperatureRepository, "TemperatureRepository", "Data access for temperature records")
+        Component(TemperaturePublisher, "TemperaturePublisher", "Publishes temperature updates")
+    }
+
+    Container(UserManagementService, "User Management Service", "Manages users", "Java") {
+        Component(UserController, "UserController", "REST API for user management")
+        Component(UserService, "UserService", "User business logic")
+        Component(UserRepository, "UserRepository", "Data access for user information")
+    }
+
+    Container(NotificationService, "Notification Service", "Sends notifications", "Java") {
+        Component(NotificationController, "NotificationController", "REST API for notifications")
+        Component(NotificationServiceLogic, "NotificationService", "Business logic for notifications")
+        Component(NotificationRepository, "NotificationRepository", "Data access for notifications")
+        Component(NotificationSubscriber, "NotificationSubscriber", "Subscribes to Kafka topics for alerts")
+    }
+
+    Container(API_Gateway, "API Gateway", "nginx / Kong") {
+        Component(RoutingComponent, "RoutingComponent", "Routes requests")
+        Component(AuthenticationComponent, "AuthenticationComponent", "User authentication and authorization")
+    }
+
+    Container_Boundary(Kafka, "Message Broker (Kafka)") {
+        Component(DeviceTopic, "DeviceTopic", "Device status updates")
+        Component(TemperatureTopic, "TemperatureTopic", "Temperature updates")
+        Component(NotificationTopic, "NotificationTopic", "Critical event notifications")
+    }
+}
+
+Rel(user, API_Gateway, "Interacts with through web/mobile interface", "HTTP/HTTPS")
+Rel(device, API_Gateway, "Sends status and sensor data", "HTTP/MQTT")
+
+Rel(DeviceController, DeviceService, "Handles device requests")
+Rel(DeviceService, DeviceRepository, "Stores device data", "SQL")
+Rel(DeviceService, DeviceStatusPublisher, "Publishes status", "Kafka")
+
+Rel(TemperatureController, TemperatureService, "Handles temperature requests")
+Rel(TemperatureService, TemperatureRepository, "Stores temperature data", "SQL")
+Rel(TemperatureService, TemperaturePublisher, "Publishes temperature data", "Kafka")
+
+Rel(UserController, UserService, "Manages user data")
+Rel(UserService, UserRepository, "Stores user information", "SQL")
+
+Rel(NotificationController, NotificationServiceLogic, "Processes notification settings")
+Rel(NotificationServiceLogic, NotificationRepository, "Stores notification settings", "SQL")
+Rel(NotificationSubscriber, NotificationServiceLogic, "Processes alerts based on updates")
+
+Rel(API_Gateway, RoutingComponent, "Routes requests to appropriate services")
+Rel(API_Gateway, AuthenticationComponent, "Handles user authentication", "Uses User Management Service")
+
+Rel(DeviceStatusPublisher, DeviceTopic, "Publishes device status updates", "Kafka")
+Rel(TemperaturePublisher, TemperatureTopic, "Publishes temperature updates", "Kafka")
+Rel(NotificationSubscriber, NotificationTopic, "Consumes updates for alerts", "Kafka")
+
+@enduml

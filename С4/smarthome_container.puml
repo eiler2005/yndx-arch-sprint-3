@@ -1,0 +1,35 @@
+@startuml
+!include https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "End user of the Smart Home system")
+Person_Ext(device, "Device", "Physical device such as a sensor or heating appliance")
+
+System_Boundary(SmartHomeSystem, "Smart Home Microservices") {
+    Container(API_Gateway, "API Gateway", "Handles routing of requests to services", "nginx / Kong / other gateway")
+    Container(DeviceManagementService, "Device Management Service", "Manages devices and controls access to sensors", "Java / Python / Node.js")
+    Container(TemperatureMonitoringService, "Temperature Monitoring Service", "Tracks and stores temperature data", "Java / Python")
+    Container(UserManagementService, "User Management Service", "Handles user authentication and authorization", "Java / Python")
+    Container(NotificationService, "Notification Service", "Sends alerts to users based on events", "Java / Python")
+    ContainerDb(Database, "PostgreSQL Database", "Stores user, device, and temperature data")
+    Container_Boundary(MessageBroker, "Message Broker") {
+        Container(Kafka, "Kafka", "Handles asynchronous communication between services")
+    }
+}
+
+Rel(user, API_Gateway, "Interacts with through web/mobile interface", "HTTP/HTTPS")
+Rel(device, API_Gateway, "Sends status and sensor data", "HTTP/MQTT")
+Rel(API_Gateway, DeviceManagementService, "Routes requests for device control (on/off, status)", "HTTP")
+Rel(API_Gateway, TemperatureMonitoringService, "Routes requests for temperature data", "HTTP")
+Rel(API_Gateway, UserManagementService, "Routes requests for user management", "HTTP")
+Rel(API_Gateway, NotificationService, "Routes requests for notifications", "HTTP")
+
+Rel(DeviceManagementService, Database, "Stores/retrieves device data (status, type, id)", "SQL")
+Rel(TemperatureMonitoringService, Database, "Stores/retrieves temperature data (currentTemperature, timestamp)", "SQL")
+Rel(UserManagementService, Database, "Stores/retrieves user data (credentials, access rights)", "SQL")
+Rel(NotificationService, Database, "Stores/retrieves notification settings", "SQL")
+
+Rel(DeviceManagementService, Kafka, "Publishes device status updates", "Message: {id, status}")
+Rel(TemperatureMonitoringService, Kafka, "Publishes temperature updates", "Message: {deviceId, currentTemperature}")
+Rel(NotificationService, Kafka, "Consumes device and temperature updates", "Processes alerts based on thresholds")
+
+@enduml
