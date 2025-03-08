@@ -1,0 +1,204 @@
+openapi: 3.0.3
+info:
+  title: Smart Home API
+  description: |-
+    API для управления устройствами, мониторинга температуры, управления пользователями и уведомлениями в системе "Умный дом".
+    Этот API включает ключевые методы для взаимодействия с микросервисами.
+  termsOfService: http://example.com/terms/
+  contact:
+    email: apiteam@smarthome.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: https://api.smarthome.com
+tags:
+  - name: Device Management
+    description: Управление устройствами
+  - name: Temperature Monitoring
+    description: Мониторинг температуры
+  - name: User Management
+    description: Управление пользователями
+  - name: Notification
+    description: Управление уведомлениями
+paths:
+  /devices:
+    get:
+      tags:
+        - Device Management
+      summary: Получить список устройств
+      description: Возвращает список всех зарегистрированных устройств.
+      responses:
+        '200':
+          description: Список устройств
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+        '500':
+          description: Ошибка сервера
+  /devices/{id}/status:
+    patch:
+      tags:
+        - Device Management
+      summary: Обновить состояние устройства
+      description: Обновляет состояние устройства (включено/выключено).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор устройства
+          schema:
+            type: string
+      requestBody:
+        description: Новое состояние устройства
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [on, off]
+      responses:
+        '200':
+          description: Устройство успешно обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка сервера
+  /temperature/{deviceId}:
+    get:
+      tags:
+        - Temperature Monitoring
+      summary: Получить данные температуры
+      description: Возвращает текущие данные температуры для указанного устройства.
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: Идентификатор устройства
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Данные температуры
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemperatureSensor'
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка сервера
+  /users:
+    post:
+      tags:
+        - User Management
+      summary: Создать нового пользователя
+      description: Регистрирует нового пользователя в системе.
+      requestBody:
+        description: Информация о новом пользователе
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Некорректный запрос
+        '500':
+          description: Ошибка сервера
+  /notifications/{userId}:
+    get:
+      tags:
+        - Notification
+      summary: Получить уведомления пользователя
+      description: Возвращает список уведомлений для указанного пользователя.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: Идентификатор пользователя
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Уведомления пользователя
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+        '404':
+          description: Уведомления не найдены
+        '500':
+          description: Ошибка сервера
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        houseId:
+          type: string
+        status:
+          type: string
+        serialNumber:
+          type: string
+    TemperatureSensor:
+      type: object
+      properties:
+        deviceId:
+          type: string
+        currentTemperature:
+          type: number
+          format: float
+        timestamp:
+          type: string
+          format: date-time
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        message:
+          type: string
+        type:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
